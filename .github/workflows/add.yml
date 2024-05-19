@@ -23,13 +23,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set user infos
+      - name: Set token
         run: |
           git config --global url."https://${{ secrets.PAT }}@github".insteadOf https://github
-          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
-          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
 
-      - name: Set SSH key
+      - name: Set ssh key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
@@ -64,6 +62,11 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set user infos
+        run: |
+          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
 
       - name: Commit & push to repositery
         run: |
