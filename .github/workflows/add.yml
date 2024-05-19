@@ -25,7 +25,7 @@ jobs:
 
       - name: Authenticate
         run: gh auth login --with-token
-        with:
+        env:
           GH_TOKEN: ${{ secrets.PAT }}
 
       - name: Add submodule
