@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT }}
-          submodules: recursive
+          submodules: true
 
       - name: Add submodule
         run: |
