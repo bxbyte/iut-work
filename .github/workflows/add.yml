@@ -24,8 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set token
-        run: |
-          git config --global url."https://${{ secrets.PAT }}@github".insteadOf https://github
+        run: git config --global url."https://${{ secrets.PAT }}@github".insteadOf https://github
 
       - name: Set ssh key
         uses: webfactory/ssh-agent@v0.9.0
@@ -38,9 +37,7 @@ jobs:
           git submodule update --force --recursive --init --remote
 
       - name: List directory
-        run: |
-          echo Content :
-          tree
+        run: tree
 
       - name: Upload artifacts
         uses: actions/upload-artifact@main
@@ -62,6 +59,9 @@ jobs:
         uses: actions/download-artifact@main
         with:
           name: '.'
+
+      - name: List directory
+        run: tree
 
       - name: Checkout
         uses: actions/checkout@v4
