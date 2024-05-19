@@ -62,6 +62,9 @@ jobs:
       - name: Restore artifacts
         uses: actions/download-artifact@main
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Commit & push to repositery
         run: |
           git add .
