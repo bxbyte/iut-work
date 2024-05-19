@@ -23,8 +23,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Authenticate
-        run: echo ${{ secrets.PAT }} | gh auth login --with-token
+      - name: Set token
+        run: |
+          git config --global url."https://${{ secrets.PAT }}@github".insteadOf https://github
+
+      - name: Set ssh key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Add submodule
         run: |
