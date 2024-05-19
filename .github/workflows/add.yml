@@ -35,6 +35,7 @@ jobs:
       - name: Add submodule
         run: |
           git submodule add ${{ inputs.repositery }} ${{ inputs.path }}
+          git submodule update --force --recursive --init --remote
 
       - name: List directory
         run: |
