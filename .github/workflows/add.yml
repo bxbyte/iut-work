@@ -12,6 +12,9 @@ on:
         type: string
         description: 'Path where the repositery should be copied'  
         required: true
+      copy:
+        type: boolean
+        description: 'If the submodule need to be copied'  
 
 jobs:
   # Assembling repositery
@@ -22,6 +25,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          submodules: recursive
 
       - name: Set token
         run: git config --global url."https://${{ secrets.PAT }}@github".insteadOf https://github
@@ -31,10 +37,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Add submodule
-        run: |
-          git submodule add ${{ inputs.repositery }} ${{ inputs.path }}
-          git submodule update --force --recursive --init --remote
+      - name: Link submodule
+        run: git submodule add ${{ inputs.repositery }} ${{ inputs.path }}
+
+      - name: Copy submodule
+        if: ${{ inputs.copy }}
+        run: git submodule update --force --recursive --init --remote ${{ inputs.path }}
 
       - name: List directory
         run: tree
@@ -60,9 +68,6 @@ jobs:
         uses: actions/download-artifact@main
         with:
           name: '.'
-
-      - name: List directory
-        run: tree
 
       - name: Checkout
         uses: actions/checkout@v4
