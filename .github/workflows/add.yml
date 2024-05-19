@@ -42,6 +42,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@main
         with:
+          name: '.'
           path: '.'
           overwrite: true
           retention-days: 1 # Keep artifacts for only a day
