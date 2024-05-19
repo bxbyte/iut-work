@@ -47,7 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - assemble
-      - publish
     permissions:
       contents: write
     steps:
