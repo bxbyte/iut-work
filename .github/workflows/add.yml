@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Authenticate
-        run: gh auth login --with-token
+        run: gh auth login
         env:
           GH_TOKEN: ${{ secrets.PAT }}
 
