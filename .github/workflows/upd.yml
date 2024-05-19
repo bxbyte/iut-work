@@ -1,0 +1,77 @@
+name: Update repo
+
+on:
+  # Run on pushes from outside
+  repository_dispatch:
+  # Manually run from the Actions tab
+  workflow_dispatch:
+
+# Allow only one concurrent deployment
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # Assembling repositery
+  assemble:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      workingPath: ${{ steps.dir.outputs.workingPath }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          submodules: recursive
+
+      - name: Update git submodules
+        working-directory:
+        run: |
+          git submodule update --force --recursive --init --remote
+
+      - name: List directory
+        run: |
+          echo Working directory : ${{ steps.dir.outputs.workingPath }}
+          echo Content :
+          tree
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@main
+        with:
+          name: '.'
+          path: ${{ steps.dir.outputs.workingPath }}
+          overwrite: true
+          retention-days: 1 # Keep artifacts for only a day
+          compression-level: 9
+
+  # Update repositery if needed
+  update:
+    runs-on: ubuntu-latest
+    needs:
+      - assemble
+      - publish
+    permissions:
+      contents: write
+      # pull-requests: write
+    steps:
+      - name: Restore artifacts
+        uses: actions/download-artifact@main
+        with:
+          name: '.'
+          path: ${{ needs.assemble.outputs.workingPath }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup git
+        run: |
+          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
+
+      - name: Commit & push to repositery
+        run: |
+          git add .
+          git commit -m '${{ env.commitMsg }}' || echo No update needed.
+          git push origin ${{ github.ref_name }}

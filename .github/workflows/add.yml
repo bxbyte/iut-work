@@ -1,0 +1,69 @@
+name: Add a repo
+
+on:
+  # Run on pushes from outside
+  workflow_dispatch:
+    inputs:
+      repositery:
+        type: string
+        description: 'Repositery to track'
+        required: true
+      path:
+        type: string
+        description: 'Path where the repositery should be copied'  
+        required: true
+
+jobs:
+  # Assembling repositery
+  assemble:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          submodules: recursive
+
+      - name: Add submodule
+        run: |
+          git submodule add ${{ inputs.repositery }} ${{ inputs.path }}
+
+      - name: List directory
+        run: |
+          echo Content :
+          tree
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@main
+        with:
+          overwrite: true
+          retention-days: 1 # Keep artifacts for only a day
+          compression-level: 9
+
+  # Update repositery if needed
+  update:
+    runs-on: ubuntu-latest
+    needs:
+      - assemble
+      - publish
+    permissions:
+      contents: write
+    steps:
+      - name: Restore artifacts
+        uses: actions/download-artifact@main
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup git
+        run: |
+          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
+
+      - name: Commit & push to repositery
+        run: |
+          git add .
+          git commit -m '${{ env.commitMsg }}' || echo No update needed.
+          git push origin ${{ github.ref_name }}
